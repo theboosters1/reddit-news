@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { RedditPost } from "@/src/services/reddit";
+import { RedditPost } from "../services/reddit";
 
 interface SavedPostsContextType {
   savedPosts: string[];

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Layout } from "@/src/components/Layout";
-import { fetchRedditPosts, CATEGORIES, RedditPost } from "@/src/services/reddit";
-import { PostCard } from "@/src/components/PostCard";
-import { Sidebar } from "@/src/components/Sidebar";
-import { Loader2, TrendingUp, Sparkles, Zap } from "lucide-react";
+import { Layout } from "../components/Layout";
+import { fetchRedditPosts, CATEGORIES, RedditPost } from "../services/reddit";
+import { PostCard } from "../components/PostCard";
+import { Sidebar } from "../components/Sidebar";
+import { Loader2, TrendingUp, Sparkles, Zap, Compass } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function HomePage() {
@@ -14,39 +14,84 @@ export function HomePage() {
 
   useEffect(() => {
     async function loadData() {
-      const { posts } = await fetchRedditPosts("all", "hot", null, 10);
-      setTrending(posts);
+      setLoading(true);
+      try {
+        const trendingRes = await fetchRedditPosts("all", "hot", null, 10);
+        setTrending(trendingRes.posts);
 
-      // Fetch all categories except "all"
-      const sectionPromises = CATEGORIES.slice(1).map(async (cat) => {
-        const { posts } = await fetchRedditPosts(cat.subreddits[0], "hot", null, 4);
-        return { id: cat.id, name: cat.name, posts };
-      });
+        // Fetch all categories except "all"
+        const sectionPromises = CATEGORIES.slice(1).map(async (cat) => {
+          try {
+            const res = await fetchRedditPosts(cat.subreddits[0], "hot", null, 4);
+            return { id: cat.id, name: cat.name, posts: res.posts };
+          } catch (e) {
+            console.error(`Error loading category ${cat.id}:`, e);
+            return { id: cat.id, name: cat.name, posts: [] };
+          }
+        });
 
-      const results = await Promise.all(sectionPromises);
-      
-      // Aggregate one headline from each category until we have enough
-      const aggregatedHeadlines = results
-        .map(res => res.posts[0])
-        .filter(p => p !== undefined)
-        .slice(0, 12); // Show up to 12 headlines
-      setHeadlines(aggregatedHeadlines);
+        const results = await Promise.all(sectionPromises);
+        
+        // Aggregate one headline from each category until we have enough
+        const aggregatedHeadlines = results
+          .map(res => res.posts[0])
+          .filter(p => p !== undefined)
+          .slice(0, 12); // Show up to 12 headlines
+        setHeadlines(aggregatedHeadlines);
 
-      const sectionData: { [key: string]: RedditPost[] } = {};
-      results.forEach((res) => {
-        sectionData[res.id] = res.posts;
-      });
-      setSections(sectionData);
-      setLoading(false);
+        const sectionData: { [key: string]: RedditPost[] } = {};
+        results.forEach((res) => {
+          sectionData[res.id] = res.posts;
+        });
+        setSections(sectionData);
+      } catch (err) {
+        console.error("Critical error in loadData:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
   }, []);
 
+  if (loading) {
+    return (
+      <Layout 
+        title="Reddified Feed | Your News Aggregator" 
+        description="The most trending discussions from across the web."
+      >
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-reddit-orange" />
+          <p className="text-reddit-text-sub animate-pulse">Fetching latest from Reddit...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  const noData = trending.length === 0 && headlines.length === 0;
+
   return (
-    <Layout>
+    <Layout 
+      title="Reddified Feed | Your News Aggregator" 
+      description="The most trending discussions from across the web."
+    >
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-12">
           <div className="flex-1 min-w-0">
+            {noData && !loading && (
+              <div className="mb-12 p-12 bg-reddit-surface border border-reddit-border rounded-[4px] text-center">
+                <Compass className="h-16 w-16 mx-auto mb-4 text-reddit-text-sub opacity-20" />
+                <h2 className="text-2xl font-bold mb-2">Unable to fetch news</h2>
+                <p className="text-reddit-text-sub max-w-md mx-auto mb-6">
+                  Reddit's API is currently restricting our requests. This usually resolves itself in a few minutes.
+                </p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-2 bg-reddit-orange text-white rounded-full font-bold hover:brightness-110 transition-all shadow-lg shadow-reddit-orange/20"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
             {/* Hero Section */}
             <header className="mb-12">
               <div className="flex items-center gap-2 text-reddit-orange font-bold text-sm uppercase tracking-widest mb-2">
@@ -61,7 +106,7 @@ export function HomePage() {
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="h-8 w-8 animate-spin text-reddit-orange" />
                 </div>
-              ) : (
+              ) : trending.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {trending.slice(0, 1).map((post) => (
                     <PostCard key={post.id} post={post} priority />
@@ -71,6 +116,10 @@ export function HomePage() {
                       <PostCard key={post.id} post={post} />
                     ))}
                   </div>
+                </div>
+              ) : (
+                <div className="py-12 px-6 rounded-lg bg-reddit-sidebox border border-reddit-border text-center">
+                  <p className="text-reddit-text-sub">No trending posts found. Some subreddits might be temporarily unavailable.</p>
                 </div>
               )}
             </header>

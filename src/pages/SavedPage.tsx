@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Layout } from "@/src/components/Layout";
-import { useSavedPosts } from "@/src/contexts/SavedPostsContext";
-import { RedditPost } from "@/src/services/reddit";
-import { PostCard } from "@/src/components/PostCard";
+import { Layout } from "../components/Layout";
+import { useSavedPosts } from "../contexts/SavedPostsContext";
+import { RedditPost } from "../services/reddit";
+import { PostCard } from "../components/PostCard";
 import { Bookmark, Inbox } from "lucide-react";
 
 export function SavedPage() {

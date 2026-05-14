@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CATEGORIES } from "@/src/services/reddit";
+import { CATEGORIES } from "../services/reddit";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/src/lib/utils";
+import { cn } from "../lib/utils";
 
 export function Sidebar() {
   const navigate = useNavigate();

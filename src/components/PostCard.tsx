@@ -1,8 +1,8 @@
 import React from "react";
-import { RedditPost } from "@/src/services/reddit";
-import { formatNumber, getRelativeTime, cn } from "@/src/lib/utils";
+import { RedditPost } from "../services/reddit";
+import { formatNumber, getRelativeTime, cn } from "../lib/utils";
 import { ArrowBigUp, MessageSquare, ExternalLink, Bookmark, Share2 } from "lucide-react";
-import { useSavedPosts } from "@/src/contexts/SavedPostsContext";
+import { useSavedPosts } from "../contexts/SavedPostsContext";
 import { motion } from "motion/react";
 
 interface PostCardProps {

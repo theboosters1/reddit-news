@@ -12,24 +12,55 @@ async function startServer() {
     const { sub, sort, after, limit } = req.query;
     const cleanSub = String(sub || "all").trim();
     const cleanSort = String(sort || "hot").trim();
-    const redditUrl = `https://www.reddit.com/r/${cleanSub}/${cleanSort}.json?limit=${limit || 25}${after ? `&after=${after}` : ""}`;
-
-    try {
-      const response = await fetch(redditUrl, {
+    
+    const tryFetch = async (domain: string, ua: string) => {
+      const url = `https://${domain}/r/${cleanSub}/${cleanSort}.json?limit=${limit || 25}${after ? `&after=${after}` : ""}&raw_json=1`;
+      console.log(`[Reddit Proxy] Fetching: ${url} with UA: ${ua.slice(0, 30)}...`);
+      return fetch(url, {
         headers: {
-          "User-Agent": "RedAggregator/1.0.0 (by /u/uaefreelancer2014)"
+          "User-Agent": ua,
+          "Accept": "application/json",
+          "Cache-Control": "no-cache"
         }
       });
+    };
 
-      if (!response.ok) {
-        return res.status(response.status).json({ error: `Reddit API returned ${response.status}` });
+    try {
+      const uas = [
+        "web:reddified-aggregator:v1.0.0 (by /u/uaefreelancer2014)",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "PostmanRuntime/7.37.0"
+      ];
+      
+      const domains = ["www.reddit.com", "old.reddit.com"];
+      
+      let lastResponse: Response | null = null;
+      
+      for (const domain of domains) {
+        for (const ua of uas) {
+          const response = await tryFetch(domain, ua);
+          if (response.ok) {
+            const data = await response.json();
+            return res.json(data);
+          }
+          lastResponse = response;
+          // If we got a 404, forget it, it won't work on other domains
+          if (response.status === 404) break;
+          // Wait a bit before retry to avoid hammering
+          await new Promise(r => setTimeout(r, 100));
+        }
       }
 
-      const data = await response.json();
-      res.json(data);
+      const errorText = lastResponse ? await lastResponse.text() : "No response";
+      console.error(`[Reddit Proxy] All attempts failed. Last status: ${lastResponse?.status}`);
+      return res.status(lastResponse?.status || 500).json({ 
+        error: `Reddit API returned ${lastResponse?.status}`,
+        details: errorText.slice(0, 150)
+      });
+      
     } catch (error) {
-      console.error("Reddit Proxy Error:", error);
-      res.status(500).json({ error: "Failed to fetch from Reddit" });
+      console.error("[Reddit Proxy] Fatal Error:", error);
+      res.status(500).json({ error: "Failed to fetch from Reddit", details: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 

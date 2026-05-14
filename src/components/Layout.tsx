@@ -1,5 +1,5 @@
-import { Navbar } from "@/src/components/Navbar";
-import { TrendingTicker } from "@/src/components/TrendingTicker";
+import { Navbar } from "./Navbar";
+import { TrendingTicker } from "./TrendingTicker";
 import { Helmet } from "react-helmet-async";
 import React from "react";
 

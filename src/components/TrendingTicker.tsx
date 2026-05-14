@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TrendingUp } from "lucide-react";
-import { fetchRedditPosts } from "@/src/services/reddit";
+import { fetchRedditPosts } from "../services/reddit";
 
 export function TrendingTicker() {
   const [trending, setTrending] = useState<string[]>([]);

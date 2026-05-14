@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, Menu, TrendingUp, Bookmark } from "lucide-react";
-import { CATEGORIES } from "@/src/services/reddit";
-import { cn } from "@/src/lib/utils";
+import { CATEGORIES } from "../services/reddit";
+import { cn } from "../lib/utils";
 
 export function Navbar() {
   const location = useLocation();
