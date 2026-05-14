@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Layout } from "@/src/components/Layout";
-import { fetchRedditPosts, CATEGORIES, RedditPost } from "@/src/services/reddit";
+import { fetchRedditPosts, CATEGORIES, RedditPost, getCategoryOrSubreddit } from "@/src/services/reddit";
 import { PostCard } from "@/src/components/PostCard";
 import { Sidebar } from "@/src/components/Sidebar";
-import { Loader2, Filter } from "lucide-react";
+import { Loader2, Filter, Compass } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 export function CategoryPage() {
@@ -12,7 +12,7 @@ export function CategoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const sort = searchParams.get("sort") || "hot";
 
-  const category = CATEGORIES.find((c) => c.id === categoryId);
+  const category = getCategoryOrSubreddit(categoryId || "all");
   const [posts, setPosts] = useState<RedditPost[]>([]);
   const [after, setAfter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,8 +60,6 @@ export function CategoryPage() {
     setAfter(nextAfter);
     setLoadingMore(false);
   }
-
-  if (!category) return <Layout>Category not found</Layout>;
 
   return (
     <Layout title={`${category.name} | Reddified Feed`} description={`Browse the latest ${category.name} updates from Reddit.`}>

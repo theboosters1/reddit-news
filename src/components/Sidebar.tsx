@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { CATEGORIES } from "@/src/services/reddit";
 import { ChevronRight } from "lucide-react";
+import { cn } from "@/src/lib/utils";
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <aside className="sticky top-20 hidden lg:flex flex-col gap-4 w-[300px] shrink-0">

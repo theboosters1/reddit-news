@@ -49,18 +49,43 @@ export const CATEGORIES = [
   { id: "anime", name: "Anime & Comics", subreddits: ["anime", "manga", "comicbooks"] },
 ];
 
+export function getCategoryOrSubreddit(id: string) {
+  const category = CATEGORIES.find((c) => c.id === id);
+  if (category) return category;
+  
+  return {
+    id,
+    name: id.length > 20 ? id.slice(0, 20) + "..." : id.charAt(0).toUpperCase() + id.slice(1),
+    subreddits: [id]
+  };
+}
+
 export async function fetchRedditPosts(
   subreddit: string,
   sort: string = "hot",
   after: string | null = null,
   limit: number = 25
 ): Promise<{ posts: RedditPost[]; after: string | null }> {
-  const url = `https://www.reddit.com/r/${subreddit}/${sort}.json?limit=${limit}${after ? `&after=${after}` : ""}`;
+  const cleanSub = subreddit.trim().startsWith("r/") ? subreddit.trim().slice(2) : subreddit.trim();
+  const url = `/api/reddit?sub=${cleanSub || "all"}&sort=${sort}&limit=${limit}${after ? `&after=${after}` : ""}`;
   
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Network response was not ok");
+
+    if (!response.ok) {
+      // Fallback to frontpage if specific subreddit fails
+      if (cleanSub !== "all" && response.status !== 429) {
+         return fetchRedditPosts("all", sort, after, limit);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const data: RedditResponse = await response.json();
+    
+    if (!data.data || !data.data.children) {
+      return { posts: [], after: null };
+    }
+
     return {
       posts: data.data.children.map((child) => child.data),
       after: data.data.after,

@@ -1,8 +1,8 @@
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, Menu, TrendingUp, Bookmark } from "lucide-react";
 import { CATEGORIES } from "@/src/services/reddit";
 import { cn } from "@/src/lib/utils";
-import { useState } from "react";
 
 export function Navbar() {
   const location = useLocation();
@@ -12,7 +12,11 @@ export function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/category/${searchQuery.trim().toLowerCase()}`);
+      let query = searchQuery.trim().toLowerCase();
+      if (query.startsWith("r/")) {
+        query = query.slice(2);
+      }
+      navigate(`/category/${query}`);
       setSearchQuery("");
     }
   };

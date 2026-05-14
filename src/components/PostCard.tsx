@@ -1,3 +1,4 @@
+import React from "react";
 import { RedditPost } from "@/src/services/reddit";
 import { formatNumber, getRelativeTime, cn } from "@/src/lib/utils";
 import { ArrowBigUp, MessageSquare, ExternalLink, Bookmark, Share2 } from "lucide-react";
@@ -7,6 +8,7 @@ import { motion } from "motion/react";
 interface PostCardProps {
   post: RedditPost;
   priority?: boolean;
+  key?: React.Key;
 }
 
 export function PostCard({ post, priority = false }: PostCardProps) {
@@ -14,7 +16,9 @@ export function PostCard({ post, priority = false }: PostCardProps) {
   const saved = isSaved(post.id);
 
   const getThumbnail = () => {
-    if (post.thumbnail && post.thumbnail.startsWith("http")) return post.thumbnail;
+    if (!post.thumbnail) return null;
+    if (["self", "default", "nsfw", "image", "spoiler"].includes(post.thumbnail)) return null;
+    if (post.thumbnail.startsWith("http")) return post.thumbnail;
     if (post.preview?.images?.[0]?.source?.url) {
       return post.preview.images[0].source.url.replaceAll("&amp;", "&");
     }
