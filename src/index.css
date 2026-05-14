@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-marquee: marquee 30s linear infinite;
+  
+  --color-reddit-orange: #FF4500;
+  --color-reddit-bg: #F0F2F5;
+  --color-reddit-surface: #FFFFFF;
+  --color-reddit-text-main: #1A1A1B;
+  --color-reddit-text-sub: #7C7C7C;
+  --color-reddit-border: #EDEFF1;
+  --color-reddit-sidebox: #F6F7F8;
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+:root {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background-color: var(--color-reddit-bg);
+  color: var(--color-reddit-text-main);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-reddit-bg: #030303;
+  --color-reddit-surface: #1A1A1B;
+  --color-reddit-text-main: #D7DADC;
+  --color-reddit-text-sub: #818384;
+  --color-reddit-border: #343536;
+  --color-reddit-sidebox: #272729;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
